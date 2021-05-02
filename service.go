@@ -15,6 +15,16 @@ func NewService() *Service {
 	)
 
 	return &Service{
-		translator: t,
+		translator: &TranslatorWithDeduplication{
+			Translator: &TranslatorWithRetry{
+				MaxTries:     5,
+				InitialDelay: 50 * time.Millisecond,
+				MaxDelay:     500 * time.Millisecond,
+
+				Translator: &TranslatorWithCache{
+					Translator: t,
+				},
+			},
+		},
 	}
 }
